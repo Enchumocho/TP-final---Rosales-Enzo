@@ -1,0 +1,250 @@
+"""
+===============================================================================
+EJERCICIO 2: Modelo de Productos, Excepciones y Persistencia
+EcoTech Solutions - Trabajo práctico integrador
+===============================================================================
+
+Este módulo gestiona el catálogo de productos sustentables de la empresa,
+implementando validaciones de negocio estrictas mediante excepciones personalizadas,
+encapsulamiento explícito de datos sensibles (stock) y persistencia en disco JSON.
+"""
+
+import json
+import os
+
+# =============================================================================
+# PASO 2.1: DISEÑAR LA EXCEPCIÓN PERSONALIZADA (StockInvalidoError)
+# =============================================================================
+
+class StockInvalidoError(Exception):
+    """
+    Excepción personalizada para representar errores de regla de negocio referentes al inventario.
+    
+    Hereda de la clase base nativa 'Exception' de Python para dar identidad propia
+    a los fallos de asignación de stock negativo en el sistema.
+    """
+    def __init__(self, mensaje="El stock no puede ser un valor negativo."):
+        """
+        Constructor del error.
+        
+        :param mensaje: Texto explicativo de la infracción de negocio.
+        """
+        # Se transfiere el mensaje al constructor de la superclase (Exception)
+        # para que el sistema de diagnóstico nativo de Python procese el error correctamente.
+        super().__init__(mensaje)
+
+
+# =============================================================================
+# PASO 2.2: DISEÑAR LA CLASE BASE DEL CATÁLOGO (DispositivoEcologico)
+# =============================================================================
+
+class DispositivoEcologico:
+    """
+    Clase base que representa a cualquier producto genérico del catálogo sustentable.
+    Centraliza el estado común y protege la variable de stock mediante encapsulamiento.
+    """
+    def __init__(self, id_producto, nombre, precio, stock):
+        """
+        Constructor de la clase base.
+        
+        :param id_producto: Identificador único del dispositivo (str).
+        :param nombre: Nombre comercial del producto (str).
+        :param precio: Valor monetario en formato numérico (float).
+        :param stock: Cantidad disponible de unidades en inventario (int).
+        """
+        # Atributos públicos directos de instancia
+        self.id_producto = id_producto
+        self.nombre = nombre
+        self.precio = precio
+        
+        # REGLA DE CONSISTENCIA DE LA GUÍA:
+        # En lugar de asignar directamente a una variable interna, se invoca a la propiedad
+        # pública 'self.stock = stock'. Esto fuerza a que la validación del setter (@stock.setter)
+        # se ejecute desde el mismísimo instante en que se instancia el objeto.
+        self.stock = stock
+
+    # --- ENCAPSULAMIENTO DEL STOCK ---
+
+    @property
+    def stock(self):
+        """
+        Getter o propiedad de lectura del atributo stock.
+        Retorna el valor almacenado en la variable protegida/privada interna (_stock).
+        """
+        return self._stock
+
+    @stock.setter
+    def stock(self, valor):
+        """
+        Setter o propiedad de escritura para el stock.
+        Aplica la regla de negocio: si el valor ingresado es menor a 0, interrumpe
+        la ejecución y lanza la excepción personalizada StockInvalidoError.
+        
+        :param valor: Nuevo valor intencional de stock.
+        """
+        # Validación condicional: ¿El stock es negativo?
+        if valor < 0:
+            # Se interrumpe el flujo elevando la excepción personalizada
+            raise StockInvalidoError(
+                f"Error en producto '{self.nombre}' [ID: {self.id_producto}]: "
+                f"Intento de asignación de stock inválido ({valor}). El stock no puede ser negativo."
+            )
+        # Si el valor es cero o positivo, se guarda en la variable protegida con guion bajo
+        self._stock = valor
+
+    def generar_ficha_tecnica(self):
+        """
+        Estructura y retorna un diccionario de Python con los datos comerciales básicos del producto.
+        Formatea el precio como una cadena monetaria limpia con exactamente 2 decimales.
+        
+        :return: dict con la ficha comercial básica.
+        """
+        return {
+            "id_producto": self.id_producto,
+            "nombre": self.nombre,
+            "precio": f"${self.precio:.2f}",
+            "stock": self.stock
+        }
+
+
+# =============================================================================
+# PASO 2.3: DISEÑAR LA SUBCLASE ESPECIALIZADA (PanelSolar)
+# =============================================================================
+
+class PanelSolar(DispositivoEcologico):
+    """
+    Subclase especializada que extiende a DispositivoEcologico.
+    Representa un panel solar fotovoltaico con atributos específicos de ingeniería.
+    """
+    def __init__(self, id_producto, nombre, precio, stock, eficiencia, potencia_w):
+        """
+        Constructor de la subclase PanelSolar.
+        
+        :param id_producto: ID del panel solar.
+        :param nombre: Nombre del modelo del panel.
+        :param precio: Precio en dinero (float).
+        :param stock: Cantidad disponible (int).
+        :param eficiencia: Porcentaje de eficiencia energética (float).
+        :param potencia_w: Potencia nominal en Watts (int/float).
+        """
+        # 1. Invocación obligatoria al constructor de la súperclase (DispositivoEcologico)
+        # Inicializa los atributos universales y ejecuta la validación del setter de stock.
+        super().__init__(id_producto, nombre, precio, stock)
+        
+        # 2. Asignación de atributos específicos de la subclase
+        self.eficiencia = eficiencia
+        self.potencia_w = potencia_w
+
+    def generar_ficha_tecnica(self):
+        """
+        SOBREESCRITURA POLIMÓRFICA:
+        Mantiene la misma firma del método base pero enriquece el diccionario final
+        incorporando los datos propios del panel fotovoltaico.
+        
+        :return: dict expandido con las especificaciones técnicas completas.
+        """
+        # Captura del diccionario base retornado por la superclase
+        ficha_base = super().generar_ficha_tecnica()
+        
+        # Incorporación de claves especializadas usando operaciones nativas de diccionarios (.update)
+        ficha_base.update({
+            "tipo_dispositivo": "Panel Solar Fotovoltaico",
+            "eficiencia": f"{self.eficiencia}%",
+            "potencia": f"{self.potencia_w}W"
+        })
+        
+        # Retorno de la estructura de datos enriquecida
+        return ficha_base
+
+
+# =============================================================================
+# PASO 2.4: PERSISTENCIA EN DISCO (GestorInventario)
+# =============================================================================
+
+class GestorInventario:
+    """
+    Encargado de la persistencia y serialización del catálogo de productos a disco.
+    """
+    @staticmethod
+    def guardar_catalogo_json(lista_dispositivos, ruta_archivo="catalogo_ecotech.json"):
+        """
+        Serializa las fichas técnicas de una lista de instancias de productos
+        y las almacena físicamente en un archivo estructurado con formato JSON.
+        
+        :param lista_dispositivos: Lista con objetos derivados de DispositivoEcologico.
+        :param ruta_archivo: Nombre o ruta destino del archivo .json.
+        """
+        # Generación de la lista de diccionarios usando compresión de listas y polimorfismo
+        catalogo_datos = [dispositivo.generar_ficha_tecnica() for dispositivo in lista_dispositivos]
+        
+        # Apertura de archivo e inserción JSON con indentación legible (4 espacios)
+        with open(ruta_archivo, 'w', encoding='utf-8') as archivo:
+            json.dump(catalogo_datos, archivo, indent=4, ensure_ascii=False)
+        
+        print(f"[PERSISTENCIA EXITOSA]: Catálogo guardado en '{ruta_archivo}'.")
+
+
+# =============================================================================
+# BLOQUE DE DEMOSTRACIÓN Y PRUEBAS INDEPENDIENTES DE EJERCICIO 2
+# =============================================================================
+
+if __name__ == "__main__":
+    print("=========================================================")
+    print(" DEMOSTRACIÓN EJERCICIO 2: MODELO DE PRODUCTOS Y POO")
+    print("=========================================================\n")
+
+    # 1. Creación de una instancia válida de PanelSolar
+    print("1. Instanciación de objeto válido de PanelSolar:")
+    try:
+        panel_solar_pro = PanelSolar(
+            id_producto="SOLAR-100",
+            nombre="EcoPanel Pro Ultra",
+            precio=299.99,
+            stock=15,
+            eficiencia=21.5,
+            potencia_w=400
+        )
+        print("   -> Objeto creado exitosamente.")
+        print("   -> Ficha técnica generada polimórficamente:")
+        print(json.dumps(panel_solar_pro.generar_ficha_tecnica(), indent=4, ensure_ascii=False))
+    except StockInvalidoError as error:
+        print(f"   [ERROR UNEXPECTED]: {error}")
+
+    print("\n---------------------------------------------------------")
+
+    # 2. Prueba intencional de fallo: Asignación de stock negativo en el constructor
+    print("2. Prueba de captura controlada de StockInvalidoError (Stock negativo inicial):")
+    try:
+        # Intento intencional de instanciar un producto con stock -5
+        panel_erroneo = PanelSolar(
+            id_producto="SOLAR-ERR",
+            nombre="EcoPanel Defectuoso",
+            precio=150.00,
+            stock=-5,  # Valor inválido según regla de negocio
+            eficiencia=18.0,
+            potencia_w=200
+        )
+    except StockInvalidoError as error:
+        print(f"   [EXCEPCIÓN CAPTURADA CORRECTAMENTE]:\n   {error}")
+
+    print("\n---------------------------------------------------------")
+
+    # 3. Prueba intencional de fallo: modificación de stock mediante setter a valor negativo
+    print("3. Prueba de captura de StockInvalidoError mediante modificación de propiedad (Setter):")
+    try:
+        print(f"   Stock actual de '{panel_solar_pro.nombre}': {panel_solar_pro.stock}")
+        print("   Intentando modificar el stock a -20 mediante setter...")
+        panel_solar_pro.stock = -20  # Esto dispara el setter y eleva la excepción
+    except StockInvalidoError as error:
+        print(f"   [EXCEPCIÓN CAPTURADA CORRECTAMENTE EN SETTER]:\n   {error}")
+
+    print("\n---------------------------------------------------------")
+
+    # 4. Exportación exitosa del catálogo de productos válidos a archivo JSON
+    print("4. Exportación de catálogo de productos al archivo JSON 'catalogo_ecotech.json':")
+    # Creamos una lista con dispositivos válidos
+    panel_secundario = PanelSolar("SOLAR-200", "EcoPanel Mini", 120.50, 30, 19.0, 150)
+    lista_catalogo = [panel_solar_pro, panel_secundario]
+    
+    # Invocamos la persistencia - Especifico la carpeta del ejercicio 2 para crearlo
+    GestorInventario.guardar_catalogo_json(lista_catalogo, "ejercicio_2_productos/catalogo_ecotech.json")

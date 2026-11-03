@@ -1,0 +1,26 @@
+[
+    {
+        "planta": "Planta Norte - Procesamiento",
+        "consumo_kwh": 1250.8
+    },
+    {
+        "planta": "Planta Sur - Refinería",
+        "consumo_kwh": 2840.5
+    },
+    {
+        "planta": "Planta Este - Ensamblado",
+        "consumo_kwh": 950.3
+    },
+    {
+        "planta": "Planta Oeste - Logística",
+        "consumo_kwh": 1600.0
+    },
+    {
+        "planta": "Planta Centro - I+D",
+        "consumo_kwh": 2100.25
+    },
+    {
+        "planta": "Planta prueba - I+D",
+        "consumo_kwh": 1000.2
+    }
+]

@@ -1,0 +1,20 @@
+[
+    {
+        "id_producto": "SOLAR-100",
+        "nombre": "EcoPanel Pro Ultra",
+        "precio": "$299.99",
+        "stock": 15,
+        "tipo_dispositivo": "Panel Solar Fotovoltaico",
+        "eficiencia": "21.5%",
+        "potencia": "400W"
+    },
+    {
+        "id_producto": "SOLAR-200",
+        "nombre": "EcoPanel Mini",
+        "precio": "$120.50",
+        "stock": 30,
+        "tipo_dispositivo": "Panel Solar Fotovoltaico",
+        "eficiencia": "19.0%",
+        "potencia": "150W"
+    }
+]

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - EcoTech Solutions</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --background: #f4f6f8;
+            --surface: #ffffff;
+            --text: #212121;
+            --border: #e0e0e0;
+            --pass: #2e7d32;
+            --fail: #d32f2f;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        header h1 { margin: 0; font-size: 24px; }
+        .summary-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .summary-item { flex: 1; text-align: center; }
+        .summary-item .number { font-size: 32px; font-weight: bold; }
+        .summary-item.pass .number { color: var(--pass); }
+        .summary-item.fail .number { color: var(--fail); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: #f1f8e9; color: var(--primary); font-weight: 600; }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 13px;
+            color: white;
+        }
+        .badge.exito { background-color: var(--pass); }
+        .badge.fallo { background-color: var(--fail); }
+        .btn-volver {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{{ titulo }}</h1>
+        </header>
+
+        <section class="summary-card">
+            <div class="summary-item">
+                <div class="number">{{ total_tests }}</div>
+                <div>Pruebas Pytest Ejecutadas</div>
+            </div>
+            <div class="summary-item pass">
+                <div class="number">{{ exitosos }}</div>
+                <div>Pruebas Exitosas (PASSED)</div>
+            </div>
+            <div class="summary-item fail">
+                <div class="number">{{ fallidos }}</div>
+                <div>Fallos / Errores</div>
+            </div>
+        </section>
+
+        <section style="background: var(--surface); border-radius: 8px; padding: 20px; border: 1px solid var(--border);">
+            <h3 style="margin-top: 0;">Reporte de Auditoría Automatizada (Framework Pytest)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Función de Prueba</th>
+                        <th>Documentación / Descripción</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in resultados %}
+                    <tr>
+                        <td><code>{{ test.nombre }}</code></td>
+                        <td>{{ test.documentacion }}</td>
+                        <td>
+                            {% if test.estado == "PASSED" %}
+                                <span class="badge exito">✓ PASSED</span>
+                            {% else %}
+                                <span class="badge fallo">✗ FAILED</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="http://127.0.0.1:8000/app/" class="btn-volver">← Volver atrás</a>
+        </section>
+    </div>
+</body>
+</html>

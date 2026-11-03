@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio N°3 - TP Final</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-hover: #1b5e20;
+            --background: #f4f6f8;
+            --surface: #ffffff;
+            --text-main: #212121;
+            --text-secondary: #555555;
+            --border: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--surface);
+            width: 100%;
+            max-width: 550px;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .header-title {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 35px;
+            font-weight: 500;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-ingresar {
+            background-color: var(--primary);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 14px 42px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+            box-shadow: 0 3px 8px rgba(46, 125, 50, 0.3);
+        }
+
+        .btn-ingresar:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(46, 125, 50, 0.4);
+        }
+
+        .btn-ingresar:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <main class="card">
+        <h1 class="header-title">Ejercicio N°3 - TP Final</h1>
+        <p class="subtitle">Auditoria de algoritmo de emisiones</p>
+        <div class="btn-container">
+            <a href="http://127.0.0.1:8000/app/testing/" class="btn-ingresar">INGRESAR</a>
+        </div>
+        <p class="subtitle"> </p>
+        <p class="subtitle">Procesamiento de métricas y renderizado web</p>
+        <div class="btn-container">
+            <a href="http://127.0.0.1:8000/app/sustentabilidad/" class="btn-ingresar">INGRESAR</a>
+        </div>
+    </main>
+
+</body>
+</html>
